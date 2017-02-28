@@ -12,11 +12,16 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import cn.ucai.live.LiveHelper;
 import cn.ucai.live.data.model.LiveSettings;
 
 import cn.ucai.live.R;
+import cn.ucai.live.utils.MFGT;
+
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.easeui.utils.EaseUserUtils;
+import com.hyphenate.easeui.widget.EaseImageView;
 
 public class MyProfileFragment extends Fragment {
     Unbinder unbinder;
@@ -25,7 +30,8 @@ public class MyProfileFragment extends Fragment {
     //@BindView(R.id.frame_rate)
     //TextView frameRateText;
     @BindView(R.id.tv_username) TextView usernameView;
-
+    @BindView(R.id.iv_avatar)
+    EaseImageView userAvatar;
     LiveSettings liveSettings;
 
     @Nullable
@@ -40,8 +46,9 @@ public class MyProfileFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        usernameView.setText(EMClient.getInstance().getCurrentUser());
-
+        //usernameView.setText(EMClient.getInstance().getCurrentUser());
+        EaseUserUtils.setUserAvatar(getContext(),EMClient.getInstance().getCurrentUser(),userAvatar);
+        EaseUserUtils.setAppUserNick(EMClient.getInstance().getCurrentUser(),usernameView);
 
         //liveSettings = new LiveSettings(getContext());
         //final String[] bitrateArr = getResources().getStringArray(R.array.bitrate_types);
@@ -66,11 +73,13 @@ public class MyProfileFragment extends Fragment {
     }
 
     @OnClick(R.id.btn_logout) void onLogout(){
-        EMClient.getInstance().logout(false, new EMCallBack() {
+
+        LiveHelper.getInstance().logout(false, new EMCallBack() {
             @Override
             public void onSuccess() {
                 getActivity().finish();
-                startActivity(new Intent(getActivity(), LoginActivity.class));
+                MFGT.gotoLoginActivityClear(getActivity());
+               // startActivity(new Intent(getActivity(), LoginActivity.class));
             }
 
             @Override
