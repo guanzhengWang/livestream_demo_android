@@ -219,11 +219,11 @@ public class StartLiveActivity extends LiveBaseActivity
           boolean success=false;
           pd.dismiss();
           if(s!=null){
-            List<String> ids=ResultUtils.getEMResultFromJson(s,String.class);
-            if(ids!=null&&ids.size()>0) {
+            String id=ResultUtils.getEMResultFromJson(s);
+            if(id!=null) {
               success=true;
-              initLive(ids.get(0));
-              startLiveByChatRoom();
+              initLive(id);
+//              startLiveByChatRoom();
             }
           }if(!success){
             CommonUtils.showLongToast("创建直播失败");

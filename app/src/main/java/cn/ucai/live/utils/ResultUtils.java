@@ -79,13 +79,18 @@ public class ResultUtils {
         }
         return  null;
     }
-    public static <T> List<T> getEMResultFromJson(String jsonStr, Class<T> clazz){
+    public static String getEMResultFromJson(String jsonStr){
 
         try {
             JSONObject jsonObject = new JSONObject(jsonStr);
 
             if(!jsonObject.isNull("retData")) {
-                JSONArray array = jsonObject.getJSONArray("retData");
+                JSONObject data=jsonObject.getJSONObject("data");
+                if(!data.isNull("id")){
+                    String id=data.getString("id");
+                    return id;
+                }
+               /* JSONArray array = jsonObject.getJSONArray("retData");
                 if (array != null) {
                     List<T> list = new ArrayList<T>();
                     for (int i = 0; i < array.length(); i++) {
@@ -95,7 +100,7 @@ public class ResultUtils {
                     }
 
                     return list;
-                }
+                }*/
             }
             return null;
         }catch (Exception e){
