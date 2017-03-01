@@ -79,6 +79,30 @@ public class ResultUtils {
         }
         return  null;
     }
+    public static <T> List<T> getEMResultFromJson(String jsonStr, Class<T> clazz){
+
+        try {
+            JSONObject jsonObject = new JSONObject(jsonStr);
+
+            if(!jsonObject.isNull("retData")) {
+                JSONArray array = jsonObject.getJSONArray("retData");
+                if (array != null) {
+                    List<T> list = new ArrayList<T>();
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject jsonGroupAvatar = array.getJSONObject(i);
+                        T ga = new Gson().fromJson(jsonGroupAvatar.toString(), clazz);
+                        list.add(ga);
+                    }
+
+                    return list;
+                }
+            }
+            return null;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return  null;
+    }
 
    /* public static <T> Result getPageResultFromJson(String jsonStr,Class<T> clazz){
         Result result = new Result();
