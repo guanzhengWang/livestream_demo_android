@@ -84,7 +84,7 @@ public class ResultUtils {
         try {
             JSONObject jsonObject = new JSONObject(jsonStr);
 
-            if(!jsonObject.isNull("retData")) {
+            if(!jsonObject.isNull("data")) {
                 JSONObject data=jsonObject.getJSONObject("data");
                 if(!data.isNull("id")){
                     String id=data.getString("id");

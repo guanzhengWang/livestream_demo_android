@@ -30,6 +30,7 @@ import cn.ucai.live.data.model.LiveSettings;
 import cn.ucai.live.R;
 
 import cn.ucai.live.utils.CommonUtils;
+import cn.ucai.live.utils.L;
 import cn.ucai.live.utils.Log2FileUtil;
 import cn.ucai.live.utils.OnCompleteListener;
 import cn.ucai.live.utils.ResultUtils;
@@ -96,6 +97,17 @@ public class StartLiveActivity extends LiveBaseActivity
     ButterKnife.bind(this);
     EaseUserUtils.setUserAvatar(StartLiveActivity.this,EMClient.getInstance().getCurrentUser(),userAvatar);
     EaseUserUtils.setAppUserNick(EMClient.getInstance().getCurrentUser(),usernameView);
+    String id=getIntent().getStringExtra("liveId");
+    if(id!=null&&!id.equals("")){
+      liveId=id;
+      chatroomId=id;
+
+    }else {
+      pd=new ProgressDialog(StartLiveActivity.this);
+      pd.setMessage("创建直播...");
+      pd.show();
+      createLive();
+    }
   /*  liveId = TestDataRepository.getLiveRoomId(EMClient.getInstance().getCurrentUser());
     chatroomId = TestDataRepository.getChatRoomId(EMClient.getInstance().getCurrentUser());
     anchorId = EMClient.getInstance().getCurrentUser();
@@ -179,14 +191,13 @@ public class StartLiveActivity extends LiveBaseActivity
    * 开始直播
    */
   @OnClick(R.id.btn_start) void startLive() {
-    pd=new ProgressDialog(StartLiveActivity.this);
-    pd.setMessage("创建直播...");
-    pd.show();
-    createLive();
     //demo为了测试方便，只有指定的账号才能开启直播
-    if (liveId == null) {
+    if (liveId == null||liveId.equals("")) {
+      CommonUtils.showLongToast("获取直播数据失败!");
+      L.e(TAG,"id is null");
       return;
     }
+    startLiveByChatRoom();
   }
   private void startLiveByChatRoom(){
     startContainer.setVisibility(View.INVISIBLE);
