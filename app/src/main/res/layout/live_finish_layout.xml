@@ -31,6 +31,7 @@
 
 
     <TextView
+        android:id="@+id/tv_showTime"
         android:layout_marginTop="26dp"
         style="@style/LiveEndTitleStyle"
         android:text="直播时间"
