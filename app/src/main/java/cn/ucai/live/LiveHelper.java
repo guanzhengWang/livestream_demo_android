@@ -50,10 +50,12 @@ import java.util.Map;
 import cn.ucai.live.data.NetDao;
 import cn.ucai.live.data.local.UserDao;
 
+import cn.ucai.live.data.model.Gift;
 import cn.ucai.live.data.model.Result;
 import cn.ucai.live.ui.activity.ChatActivity;
 import cn.ucai.live.ui.activity.LoginActivity;
 import cn.ucai.live.ui.activity.MainActivity;
+import cn.ucai.live.utils.L;
 import cn.ucai.live.utils.OnCompleteListener;
 import cn.ucai.live.utils.PreferenceManager;
 import cn.ucai.live.utils.ResultUtils;
@@ -85,6 +87,7 @@ public class LiveHelper {
 
     private Map<String, EaseUser> contactList;
     private Map<String, User> userContactList;
+    private Map<Integer, Gift> appGiftList;
 
 
     private static LiveHelper instance = null;
@@ -167,7 +170,76 @@ public class LiveHelper {
             setGlobalListeners();
             broadcastManager = LocalBroadcastManager.getInstance(appContext);
             initDbDao();
+            initGiftList();
         }
+    }
+
+    private void initGiftList() {
+        NetDao.loadAllGift(appContext, new OnCompleteListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                if (s != null) {
+                    Result result = ResultUtils.getListResultFromJson(s, Gift.class);
+                    if (result != null && result.isRetMsg()) {
+                        List<Gift> list = (List<Gift>) result.getRetData();
+                        if (list != null && list.size() > 0) {
+                            L.e(TAG, "gift list=" + list.size());
+                            Map<Integer, Gift> giftlist = new HashMap<>();
+                            for (Gift gift : list) {
+                                giftlist.put(gift.getId(), gift);
+                            }
+                            // save the contact list to cache
+                            getAppGiftList().clear();
+                            getAppGiftList().putAll(giftlist);
+                            // save the contact list to database
+                            UserDao dao = new UserDao(appContext);
+                            List<Gift> gifts = new ArrayList<Gift>(giftlist.values());
+                            dao.saveAppGiftList(gifts);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+
+            }
+        });
+
+    }
+
+    /**
+     * update contact list
+     *
+     * @param list
+     */
+    public void setAppGiftList(Map<Integer, Gift> list) {
+        if (list == null) {
+            if (appGiftList != null) {
+                appGiftList.clear();
+            }
+            return;
+        }
+
+        appGiftList = list;
+    }
+
+    /**
+     * get contact list
+     *
+     * @return
+     */
+    public Map<Integer, Gift> getAppGiftList() {
+        if (appGiftList == null || appGiftList.size() == 0) {
+            appGiftList = demoModel.getAppGiftList();
+        }
+
+        // return a empty non-null object to avoid app crash
+        if (appGiftList == null) {
+            return new Hashtable<Integer, Gift>();
+        }
+
+        return appGiftList;
     }
 
 
@@ -338,20 +410,20 @@ public class LiveHelper {
                 Intent intent = new Intent(appContext, ChatActivity.class);
                 // open calling activity if there is call
 
-                    ChatType chatType = message.getChatType();
-                    if (chatType == ChatType.Chat) { // single chat message
-                        intent.putExtra("userId", message.getFrom());
-                        intent.putExtra("chatType", LiveConstants.CHATTYPE_SINGLE);
-                    } else { // group chat message
-                        // message.getTo() is the group id
-                        intent.putExtra("userId", message.getTo());
-                        if (chatType == ChatType.GroupChat) {
-                            intent.putExtra("chatType", LiveConstants.CHATTYPE_GROUP);
-                        } else {
-                            intent.putExtra("chatType", LiveConstants.CHATTYPE_CHATROOM);
-                        }
-
+                ChatType chatType = message.getChatType();
+                if (chatType == ChatType.Chat) { // single chat message
+                    intent.putExtra("userId", message.getFrom());
+                    intent.putExtra("chatType", LiveConstants.CHATTYPE_SINGLE);
+                } else { // group chat message
+                    // message.getTo() is the group id
+                    intent.putExtra("userId", message.getTo());
+                    if (chatType == ChatType.GroupChat) {
+                        intent.putExtra("chatType", LiveConstants.CHATTYPE_GROUP);
+                    } else {
+                        intent.putExtra("chatType", LiveConstants.CHATTYPE_CHATROOM);
                     }
+
+                }
 
                 return intent;
             }
@@ -1149,18 +1221,19 @@ public class LiveHelper {
 
         return userContactList;
     }
+
     public void asyncGetCurrentUserInfo(Activity activity) {
         NetDao.GetUserByUsername(activity, EMClient.getInstance().getCurrentUser(), new OnCompleteListener<String>() {
             @Override
             public void onSuccess(String s) {
-                Log.e("UUUUU","result"+s);
-                if(s!=null){
+                Log.e("UUUUU", "result" + s);
+                if (s != null) {
                     Result result = ResultUtils.getResultFromJson(s, User.class);
-                    Log.e("RRRR",result.toString());
-                    if(result!=null&& result.isRetMsg()){
-                        User user= (User) result.getRetData();
-                        if(user!=null) {
-                            Log.e("USER",user.toString());
+                    Log.e("RRRR", result.toString());
+                    if (result != null && result.isRetMsg()) {
+                        User user = (User) result.getRetData();
+                        if (user != null) {
+                            Log.e("USER", user.toString());
                             LiveHelper.getInstance().saveAppContact(user);
                             PreferenceManager.getInstance().setCurrentUserNick(user.getMUserNick());
                             PreferenceManager.getInstance().setCurrentUserAvatar(user.getAvatar());
