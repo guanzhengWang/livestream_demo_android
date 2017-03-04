@@ -327,7 +327,7 @@ public class LiveDBManager {
              SQLiteDatabase db = dbHelper.getReadableDatabase();
                 Map<Integer, Gift> gifts = new Hashtable<Integer, Gift>();
                 if (db.isOpen()) {
-                        Cursor cursor = db.rawQuery("select * from " + UserDao.GIFT_TABLE_NAME /* + " desc" */, null);
+                        Cursor cursor = db.rawQuery("select * from " + UserDao.GIFT_TABLE_NAME , null);
                         while (cursor.moveToNext()) {
                                 Gift gift = new Gift();
                                 gift.setId(cursor.getInt(cursor.getColumnIndex(UserDao.GIFT_COLUMN_ID)));

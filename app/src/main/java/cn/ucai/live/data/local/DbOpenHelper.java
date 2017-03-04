@@ -75,6 +75,7 @@ public class DbOpenHelper extends SQLiteOpenHelper{
 		db.execSQL(USERNAME_TABLE_CREATE);
 		db.execSQL(CREATE_PREF_TABLE);
 		db.execSQL(USER_TABLE_CREATE);
+		db.execSQL(GIFT_TABLE_CREATE);
 	}
 
 	@Override
