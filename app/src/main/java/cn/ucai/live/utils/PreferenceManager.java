@@ -387,7 +387,12 @@ public class PreferenceManager {
 		editor.apply();
 	}
 
-	public int getChange(Wallet wallet) {
+	public int getChange( ) {
 		return mSharedPreferences.getInt(SHARED_KEY_GET_CHANGE,0);
 	}
+	public void setChange(int money){
+		editor.putInt(SHARED_KEY_GET_CHANGE,money);
+		editor.apply();
+	}
+
 }

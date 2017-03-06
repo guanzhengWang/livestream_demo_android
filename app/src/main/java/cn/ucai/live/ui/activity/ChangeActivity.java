@@ -16,13 +16,14 @@ import cn.ucai.live.data.NetDao;
 import cn.ucai.live.data.model.Result;
 import cn.ucai.live.data.model.Wallet;
 import cn.ucai.live.utils.OnCompleteListener;
+import cn.ucai.live.utils.PreferenceManager;
 import cn.ucai.live.utils.ResultUtils;
 
 public class ChangeActivity extends AppCompatActivity {
 
     @BindView(R.id.tv_change_balance)
     TextView tvChangeBalance;
-    long money;
+    int money;
     @BindView(R.id.target_layout)
     LinearLayout targetLayout;
     View viewLoading;
@@ -47,6 +48,7 @@ public class ChangeActivity extends AppCompatActivity {
                         Wallet wallet = (Wallet) result.getRetData();
                         money = wallet.getBalance();
                         tvChangeBalance.setText("￥" + money);
+                        PreferenceManager.getInstance().setChange(money);
                         viewLoading.setVisibility(View.GONE);
                     }
                 }

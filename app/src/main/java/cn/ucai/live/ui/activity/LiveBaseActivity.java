@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,14 +30,20 @@ import cn.ucai.live.I;
 import cn.ucai.live.LiveConstants;
 import cn.ucai.live.LiveHelper;
 import cn.ucai.live.R;
+import cn.ucai.live.data.NetDao;
 import cn.ucai.live.data.TestAvatarRepository;
 import cn.ucai.live.data.model.Gift;
+import cn.ucai.live.data.model.Result;
+import cn.ucai.live.data.model.Wallet;
 import cn.ucai.live.ui.widget.BarrageLayout;
 import cn.ucai.live.ui.widget.LiveLeftGiftView;
 import cn.ucai.live.ui.widget.PeriscopeLayout;
 import cn.ucai.live.ui.widget.RoomMessagesView;
+import cn.ucai.live.utils.CommonUtils;
 import cn.ucai.live.utils.L;
+import cn.ucai.live.utils.OnCompleteListener;
 import cn.ucai.live.utils.PreferenceManager;
+import cn.ucai.live.utils.ResultUtils;
 import cn.ucai.live.utils.Utils;
 
 import com.github.florent37.viewanimator.AnimationListener;
@@ -133,7 +140,7 @@ public abstract class LiveBaseActivity extends BaseActivity {
                 leftGiftView.setVisibility(View.VISIBLE);
                 leftGiftView.setAvatar(message.getFrom());
                 leftGiftView.setName(message.getStringAttribute(I.User.NICK, message.getFrom()));
-                leftGiftView.setGift(message.getIntAttribute(LiveConstants.CMD_GIFT,0));
+                leftGiftView.setGift(message.getIntAttribute(LiveConstants.CMD_GIFT, 0));
                 leftGiftView.setTranslationY(0);
                 ViewAnimator.animate(leftGiftView)
                         .alpha(0, 1)
@@ -179,7 +186,7 @@ public abstract class LiveBaseActivity extends BaseActivity {
                 leftGiftView2.setVisibility(View.VISIBLE);
                 leftGiftView2.setAvatar(message.getFrom());
                 leftGiftView2.setName(nick);
-                leftGiftView2.setGift(message.getIntAttribute(LiveConstants.CMD_GIFT,0));
+                leftGiftView2.setGift(message.getIntAttribute(LiveConstants.CMD_GIFT, 0));
                 leftGiftView2.setTranslationY(0);
                 ViewAnimator.animate(leftGiftView2)
                         .alpha(0, 1)
@@ -497,22 +504,23 @@ public abstract class LiveBaseActivity extends BaseActivity {
     void onPresentImageClick() {
         final RoomGiftListDialog dialog = RoomGiftListDialog.newInstance();
         dialog.setGiftOnClickListener(new View.OnClickListener() {
-                                          @Override
-                                          public void onClick(View v) {
-                                              int id = (int) v.getTag();
-                                              showPayMentTip(dialog,id);
-                                          }
-                                      });
-        dialog.show(getSupportFragmentManager(),"RoomGiftListDialog");}
+            @Override
+            public void onClick(View v) {
+                int id = (int) v.getTag();
+                showPayMentTip(dialog, id);
+            }
+        });
+        dialog.show(getSupportFragmentManager(), "RoomGiftListDialog");
+    }
 
-    private void showPayMentTip(final RoomGiftListDialog dialog,final int id){
-        if (PreferenceManager.getInstance().getPayMentTip()){
-            sendGiftMsg(dialog,id);
-        }else{
-            Gift gift = LiveHelper.getInstance().getAppGiftList().get(id);
+    private void showPayMentTip(final RoomGiftListDialog dialog, final int id) {
+        if (PreferenceManager.getInstance().getPayMentTip()) {
+            sendGiftMsg(dialog, id);
+        } else {
+            final Gift gift = LiveHelper.getInstance().getAppGiftList().get(id);
             final AlertDialog.Builder builder = new AlertDialog.Builder(LiveBaseActivity.this);
             builder.setTitle("提示")
-                    .setMessage("该礼物需要支付"+gift.getGprice()+",你确认支付么?");
+                    .setMessage("该礼物需要支付" + gift.getGprice() + ",你确认支付么?");
             View view = getLayoutInflater().inflate(R.layout.layout_payment_tip, null);
             CheckBox cb = (CheckBox) view.findViewById(R.id.payment_tips_nomore);
             cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -525,7 +533,19 @@ public abstract class LiveBaseActivity extends BaseActivity {
             builder.setNegativeButton("确定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface d, int which) {
-                    sendGiftMsg(dialog,id);
+                    sendGiftMsg(dialog, id);
+                    int price = gift.getGprice();
+                    Log.e(TAG, "PPPPP "+price);
+                    int money = PreferenceManager.getInstance().getChange();
+                    Log.e(TAG,"mmmm "+money);
+                    if (money > price) {
+                        givingGift(id);
+                    }else{
+                        final AlertDialog.Builder builder = new AlertDialog.Builder(LiveBaseActivity.this);
+                        builder.setTitle("提示")
+                                .setMessage("该礼物需要支付" + gift.getGprice() + ",你的余额不足");
+
+                    }
                 }
             }).setPositiveButton("取消", new DialogInterface.OnClickListener() {
                 @Override
@@ -537,7 +557,35 @@ public abstract class LiveBaseActivity extends BaseActivity {
         }
     }
 
-    private void sendGiftMsg(RoomGiftListDialog dialog,int id){
+    private void givingGift(int GiftId) {
+        NetDao.givingGifts(this, EMClient.getInstance().getCurrentUser(), chatroom.getOwner(), GiftId, 1, new OnCompleteListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                boolean success =false;
+                if(s!=null){
+                    Log.e(TAG,"SSSS "+s);
+                    Result result = ResultUtils.getResultFromJson(s, Wallet.class);
+                    if(result!=null&&result.isRetMsg()){
+
+                        int money=PreferenceManager.getInstance().getChange();
+                        PreferenceManager.getInstance().setChange(money);
+                        CommonUtils.showLongToast("送礼物成功!");
+                        success=true;
+                    }
+                }
+                if(!success){
+                    CommonUtils.showLongToast("送礼物失败!");
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                CommonUtils.showLongToast("送礼物失败!");
+            }
+        });
+    }
+
+    private void sendGiftMsg(RoomGiftListDialog dialog, int id) {
         dialog.dismiss();
         User user = getAppUserInfo(EMClient.getInstance().getCurrentUser());
         L.e(TAG, "send present,user=" + user);
@@ -546,7 +594,7 @@ public abstract class LiveBaseActivity extends BaseActivity {
         EMCmdMessageBody cmdMessageBody = new EMCmdMessageBody(LiveConstants.CMD_GIFT);
         message.addBody(cmdMessageBody);
         message.setAttribute(I.User.NICK, user.getMUserNick());
-        message.setAttribute(LiveConstants.CMD_GIFT,id);
+        message.setAttribute(LiveConstants.CMD_GIFT, id);
         message.setChatType(EMMessage.ChatType.ChatRoom);
         EMClient.getInstance().chatManager().sendMessage(message);
         showLeftGiftVeiw(message);

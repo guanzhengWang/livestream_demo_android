@@ -1256,7 +1256,7 @@ public class LiveHelper {
                     if(result!=null&&result.isRetMsg()){
                         Wallet wallet= (Wallet) result.getRetData();
                         if(wallet!=null){
-                            PreferenceManager.getInstance().getChange(wallet);
+                            PreferenceManager.getInstance().getChange();
                         }
                     }
                 }
