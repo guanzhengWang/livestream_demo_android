@@ -17,6 +17,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.hyphenate.easeui.domain.User;
+
+import cn.ucai.live.data.model.Wallet;
+
 public class PreferenceManager {
 	/**
 	 * name of preference
@@ -50,7 +54,7 @@ public class PreferenceManager {
 	private static String SHARED_KEY_ENABLE_CUSTOM_SERVER = "SHARED_KEY_ENABLE_CUSTOM_SERVER";
 	private static String SHARED_KEY_ENABLE_CUSTOM_APPKEY = "SHARED_KEY_ENABLE_CUSTOM_APPKEY";
 	private static String SHARED_KEY_CUSTOM_APPKEY = "SHARED_KEY_CUSTOM_APPKEY";
-
+	private static String SHARED_KEY_GET_CHANGE ="SHARED_KEY_GET_CHANGE";
 	private static String SHARED_KEY_CALL_MIN_VIDEO_KBPS = "SHARED_KEY_CALL_MIN_VIDEO_KBPS";
 	private static String SHARED_KEY_CALL_MAX_VIDEO_KBPS = "SHARED_KEY_CALL_Max_VIDEO_KBPS";
 	private static String SHARED_KEY_CALL_MAX_FRAME_RATE = "SHARED_KEY_CALL_MAX_FRAME_RATE";
@@ -383,4 +387,7 @@ public class PreferenceManager {
 		editor.apply();
 	}
 
+	public int getChange(Wallet wallet) {
+		return mSharedPreferences.getInt(SHARED_KEY_GET_CHANGE,0);
+	}
 }
