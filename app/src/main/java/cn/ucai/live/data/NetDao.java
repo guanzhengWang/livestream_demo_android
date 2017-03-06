@@ -194,7 +194,13 @@ public class NetDao {
                 .addParam("giftNum", String.valueOf(giftNum))
                 .targetClass(String.class)
                 .execute(listener);
-
-
+    }
+    public static void Rechange(Context context,String username,String rmb,OnCompleteListener<String> listener){
+        OkHttpUtils<String> utils=new OkHttpUtils<>(context);
+        utils.setRequestUrl(I.REQUEST_RECHARGE)
+                .addParam("uname",username)
+                .addParam("rmb", rmb)
+                .targetClass(String.class)
+                .execute(listener);
     }
 }

@@ -11,10 +11,12 @@ import com.hyphenate.chat.EMClient;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import cn.ucai.live.R;
 import cn.ucai.live.data.NetDao;
 import cn.ucai.live.data.model.Result;
 import cn.ucai.live.data.model.Wallet;
+import cn.ucai.live.utils.MFGT;
 import cn.ucai.live.utils.OnCompleteListener;
 import cn.ucai.live.utils.PreferenceManager;
 import cn.ucai.live.utils.ResultUtils;
@@ -27,12 +29,15 @@ public class ChangeActivity extends AppCompatActivity {
     @BindView(R.id.target_layout)
     LinearLayout targetLayout;
     View viewLoading;
+    @BindView(R.id.tv_change_recharge)
+    TextView tvChangeRecharge;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change);
         ButterKnife.bind(this);
-        viewLoading = LayoutInflater.from(ChangeActivity.this).inflate(R.layout.rp_loading, targetLayout,false);
+        viewLoading = LayoutInflater.from(ChangeActivity.this).inflate(R.layout.rp_loading, targetLayout, false);
         targetLayout.addView(viewLoading);
         initData();
 
@@ -61,4 +66,8 @@ public class ChangeActivity extends AppCompatActivity {
         });
     }
 
+    @OnClick(R.id.tv_change_recharge)
+    public void onClick() {
+        MFGT.gotoReChangeActivity(this);
+    }
 }

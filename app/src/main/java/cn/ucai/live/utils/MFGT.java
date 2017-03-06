@@ -12,6 +12,7 @@ import cn.ucai.live.R;
 import cn.ucai.live.ui.activity.ChangeActivity;
 import cn.ucai.live.ui.activity.LoginActivity;
 import cn.ucai.live.ui.activity.MainActivity;
+import cn.ucai.live.ui.activity.ReChangeActivity;
 import cn.ucai.live.ui.activity.RegisterActivity;
 
 
@@ -54,5 +55,9 @@ public class MFGT {
 
     public static void gotoChangeActivity(Activity activity) {
         startActivity(activity, ChangeActivity.class);
+    }
+
+    public static void gotoReChangeActivity(Activity activity) {
+        startActivity(activity, ReChangeActivity.class);
     }
 }
